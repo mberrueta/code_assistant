@@ -1,0 +1,84 @@
+defmodule CodeAssistant.CLI do
+  alias Owl.Data, as: D
+  alias Owl.IO
+
+  # The main entry point for the command-line application.
+  def main(_args) do
+    workflow_data =
+      :ok
+      |> select_language()
+      |> select_task()
+      |> get_prompts()
+      |> select_filters()
+
+    # Display a summary of the collected information.
+    display_summary(workflow_data)
+  end
+
+  # Step 1: Prompt the user to select a programming language.
+  defp select_language(:ok) do
+    language =
+      IO.select(["Elixir", "Ruby"])
+
+    %{language: language}
+  end
+
+  # Step 2: Prompt the user to select the desired task.
+  defp select_task(data) do
+    task =
+      IO.select(["Refactor code", "Generate tests"])
+
+    Map.put(data, :task, task)
+  end
+
+  # Step 3: Get the main (positive) and negative prompts from the user.
+  defp get_prompts(data) do
+    # Corrected call in get_prompts/1
+    IO.puts(Owl.Box.new("", title: "Now, provide the details for the task.", border_tag: :cyan))
+    positive = IO.input(label: "Enter the code or main prompt:")
+    negative = IO.input(label: "What should the assistant avoid? (optional, press Enter to skip)")
+
+    data
+    |> Map.put(:positive_prompt, positive)
+    |> Map.put(:negative_prompt, negative)
+  end
+
+  # Step 4: Allow the user to select multiple filters for the output.
+  defp select_filters(data) do
+    filters =
+      Owl.IO.input(label: "filters")
+
+    Map.put(data, :filters, filters)
+  end
+
+  # Final Step: Display a summary of all the collected data in a formatted panel.
+  defp display_summary(data) do
+    # We can't inject Owl structs into a string with "#{...}".
+    # Instead, we create a list of printable items. IO.panel knows how to render it.
+    content = [
+      D.tag("Language:", :cyan),
+      " #{data.language}\n",
+      D.tag("Task:", :cyan),
+      "     #{data.task}\n\n",
+      D.tag("Prompt:", :cyan),
+      "\n",
+      # Add a little indentation to the user's prompt text
+      "  #{data.positive_prompt}\n\n",
+      D.tag("To Avoid:", :cyan),
+      "\n",
+      "  #{if data.negative_prompt == "", do: "None", else: data.negative_prompt}\n\n",
+      D.tag("Filters:", :cyan),
+      "  ",
+      # This check correctly handles both an empty list from multiselect or user input
+      if(data.filters == [] or data.filters == "",
+        do: "None",
+        else: Enum.join(List.wrap(data.filters), ", ")
+      )
+    ]
+
+    summary_box = Owl.Box.new(content, title: "Request Summary", border: :heavy)
+
+    # Step 2: Print the final box to the console.
+    Owl.IO.puts(summary_box)
+  end
+end
