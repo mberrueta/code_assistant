@@ -21,5 +21,6 @@ code_assistant-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+tmp_test_elixir_files/
 .aider*
 /.envrc.custom
