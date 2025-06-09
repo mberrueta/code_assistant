@@ -35,7 +35,7 @@ defmodule CodeAssistan.Tasks.AiderCommand do
     context
     |> Map.put(
       :aider_commands,
-      Enum.reduce(context.primary_files, context.aider_commands, fn file_to_test, acc_commands ->
+      Enum.reduce(context.primary_files, %{}, fn file_to_test, acc_commands ->
         acc_commands
         |> Map.put(file_to_test, do_gen_command(context, file_to_test))
       end)

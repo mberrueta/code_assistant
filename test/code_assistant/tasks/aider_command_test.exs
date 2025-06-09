@@ -35,6 +35,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "--file test/primary_one_test.exs",
       "--message \"Positive Prompt: Please act as an expert Elixir developer.\n\n\nNegative Prompt: Do not use basic `fixtures`.\n\n\""
     ]
+
     expected_command = Enum.join(expected_parts, " ")
 
     result_context = AiderCommand.call(context)
@@ -63,6 +64,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "--file test/file1_test.exs",
       "--message \"Positive Prompt: Positive\n\n\nNegative Prompt: Negative\n\n\""
     ]
+
     expected_command1 = Enum.join(expected_parts1, " ")
 
     expected_parts2 = [
@@ -73,6 +75,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "--file test/file2_test.exs",
       "--message \"Positive Prompt: Positive\n\n\nNegative Prompt: Negative\n\n\""
     ]
+
     expected_command2 = Enum.join(expected_parts2, " ")
 
     result_context = AiderCommand.call(context)
@@ -96,6 +99,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "--file test/file_test.exs",
       "--message \"Negative Prompt: Negative only\n\n\""
     ]
+
     expected_command = Enum.join(expected_parts, " ")
 
     result_context = AiderCommand.call(context)
@@ -118,6 +122,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "--file test/file_test.exs",
       "--message \"Positive Prompt: Positive only\n\n\""
     ]
+
     expected_command = Enum.join(expected_parts, " ")
 
     result_context = AiderCommand.call(context)
@@ -142,6 +147,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "--read lib/file.ex",
       "--file test/file_test.exs"
     ]
+
     expected_command = Enum.join(expected_parts, " ")
 
     result_context = AiderCommand.call(context)
@@ -154,7 +160,8 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
     context = %{
       primary_files: ["test/file_test.exs"],
       global_readonly_files: ["global.md"],
-      readonly_files: %{"test/file_test.exs" => []}, # Empty local readonly files
+      # Empty local readonly files
+      readonly_files: %{"test/file_test.exs" => []},
       positive_prompt: "Prompt",
       aider_commands: %{}
     }
@@ -165,6 +172,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "--file test/file_test.exs",
       "--message \"Positive Prompt: Prompt\n\n\""
     ]
+
     expected_command = Enum.join(expected_parts, " ")
 
     result_context = AiderCommand.call(context)
@@ -175,7 +183,8 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
   test "handles empty global_readonly_files" do
     context = %{
       primary_files: ["test/file_test.exs"],
-      global_readonly_files: [], # Empty global readonly files
+      # Empty global readonly files
+      global_readonly_files: [],
       readonly_files: %{"test/file_test.exs" => ["lib/file.ex"]},
       positive_prompt: "Prompt",
       aider_commands: %{}
@@ -187,6 +196,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "--file test/file_test.exs",
       "--message \"Positive Prompt: Prompt\n\n\""
     ]
+
     expected_command = Enum.join(expected_parts, " ")
 
     result_context = AiderCommand.call(context)

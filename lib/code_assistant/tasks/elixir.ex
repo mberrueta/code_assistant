@@ -1,9 +1,7 @@
 defmodule CodeAssistan.Tasks.Elixir do
   @moduledoc "A utility module for Elixir-related file and code tasks."
 
-  @base_read_files [
-    "assets/prompts/elixir.md"
-  ]
+  @base_read_files ["assets/prompts/elixir.md"]
   def base_read_files, do: @base_read_files
 
   @doc """
@@ -94,7 +92,8 @@ defmodule CodeAssistan.Tasks.Elixir do
           |> Enum.uniq()
           |> Enum.sort()
         else
-          _error -> [] # No main module base found or other issue
+          # No main module base found or other issue
+          _error -> []
         end
 
       {:error, _reason} ->
@@ -126,9 +125,11 @@ defmodule CodeAssistan.Tasks.Elixir do
       # Regex.scan returns a list of lists of captures, e.g., [["PrimaryOne.HelperA"], ["PrimaryOne.HelperB"]]
       # Each inner list contains the string captured by the first (and only) capturing group.
       Regex.scan(module_capture_regex, line, capture: :all_but_first)
-      |> Enum.map(fn [module_name] -> module_name end) # Extracts the module name string
+      # Extracts the module name string
+      |> Enum.map(fn [module_name] -> module_name end)
     end)
-    |> Enum.uniq() # Ensure unique module names
+    # Ensure unique module names
+    |> Enum.uniq()
   end
 
   # Converts a module string like "MySystem.MyModule" to "lib/my_system/my_module.ex"
@@ -138,10 +139,13 @@ defmodule CodeAssistan.Tasks.Elixir do
 
     case parts do
       [] ->
-        nil # Should not happen for valid module strings
+        # Should not happen for valid module strings
+        nil
+
       [single_filename_part] ->
         # e.g., "MySystem" (module) -> "my_system" (part) -> "lib/my_system.ex" (path)
         Path.join("lib", "#{single_filename_part}.ex")
+
       [root_dir_part | path_segments] ->
         # e.g., "MySystem.MyModule" -> parts: ["my_system", "my_module"]
         # root_dir_part = "my_system"
