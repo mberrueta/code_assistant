@@ -33,28 +33,35 @@ defmodule CodeAssistant.CLI do
 
   # Step 3: Get the main (positive) and negative prompts from the user.
   defp get_prompts(data) do
-    # Corrected call in get_prompts/1
-    IO.puts(Owl.Box.new("", title: "Now, provide the details for the task.", border_tag: :cyan))
-    positive = IO.input(label: "Enter the code or main prompt:")
-    negative = IO.input(label: "What should the assistant avoid? (optional, press Enter to skip)")
+    IO.puts(D.tag("Now, provide the details for the task.", :cyan))
+
+    positive =
+      IO.input(
+        label: "Enter the code or main prompt. (optional, press Enter to skip)",
+        optional: true
+      )
+
+    negative =
+      IO.input(
+        label: "What should the assistant avoid? (optional, press Enter to skip)",
+        optional: true
+      )
 
     data
     |> Map.put(:positive_prompt, positive)
     |> Map.put(:negative_prompt, negative)
   end
 
-  # Step 4: Allow the user to select multiple filters for the output.
+  # Filter project files, to add Aider to the context files
   defp select_filters(data) do
     filters =
-      Owl.IO.input(label: "filters")
+      Owl.IO.input(label: "filters(optional, press Enter to skip)", optional: true)
 
     Map.put(data, :filters, filters)
   end
 
   # Final Step: Display a summary of all the collected data in a formatted panel.
   defp display_summary(data) do
-    # We can't inject Owl structs into a string with "#{...}".
-    # Instead, we create a list of printable items. IO.panel knows how to render it.
     content = [
       D.tag("Language:", :cyan),
       " #{data.language}\n",
@@ -78,7 +85,6 @@ defmodule CodeAssistant.CLI do
 
     summary_box = Owl.Box.new(content, title: "Request Summary", border: :heavy)
 
-    # Step 2: Print the final box to the console.
     Owl.IO.puts(summary_box)
   end
 end

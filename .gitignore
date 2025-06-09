@@ -21,3 +21,5 @@ code_assistant-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+.aider*
+/.envrc.custom
