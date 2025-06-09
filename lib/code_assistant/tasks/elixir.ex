@@ -40,7 +40,8 @@ defmodule CodeAssistan.Tasks.Elixir do
     project_files =
       Path.wildcard("**/*.{ex,exs}")
       |> Enum.reject(fn path ->
-        Enum.any?(["deps/", "priv/", "_build"], &String.starts_with?(path, &1))
+        # Exclude common build/dependency dirs and also test directories for this task
+        Enum.any?(["deps/", "priv/", "_build/", "test/"], &String.starts_with?(path, &1))
       end)
       |> Enum.sort()
 

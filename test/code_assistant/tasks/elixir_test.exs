@@ -9,12 +9,16 @@ defmodule CodeAssistan.Tasks.ElixirTest do
                                "debug_single_file.ex",
                                "lib/d.ex",
                                "lib/primary_four/helper_d.ex",
+                               # Renamed from primary_four_dot_alias.ex
+                               "lib/primary_four/sub_module.ex",
                                "lib/primary_four/sub_module/helper_e.ex",
+                               # Renamed from primary_one.ex
+                               "lib/primary_one.ex",
                                "lib/primary_one/helper_a.ex",
                                "lib/primary_one/helper_b.ex",
-                               "primary_four_dot_alias.ex",
-                               "primary_one.ex",
-                               "primary_three_no_relevant_aliases.ex",
+                               # Renamed
+                               "lib/primary_three_no_relevant_aliases.ex",
+                               # Stays at root of fixture
                                "primary_two_no_module.ex"
                              ]
                              |> Enum.sort()
@@ -46,21 +50,25 @@ defmodule CodeAssistan.Tasks.ElixirTest do
 
     test "when filter targets a single specific project file" do
       context = %{
-        filters: "primary_one.ex",
+        # Updated filter to reflect new path
+        filters: "lib/primary_one.ex",
         task: "Generate tests",
         language: "Elixir"
       }
 
-      expected_primary_files = ["primary_one.ex"]
+      # Updated expectation
+      expected_primary_files = ["lib/primary_one.ex"]
 
       result_context = CodeAssistan.Tasks.Elixir.call(context)
-      dbg(result_context)
       assert Map.get(result_context, :project_files) == @all_fixture_project_files
       assert Map.get(result_context, :primary_files) == expected_primary_files
       assert Map.get(result_context, :global_readonly_files) == ["assets/prompts/elixir.md"]
 
       assert Map.get(result_context, :readonly_files) == %{
-               "primary_one.ex" => ["lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex"]
+               "lib/primary_one.ex" => [
+                 "lib/primary_one/helper_a.ex",
+                 "lib/primary_one/helper_b.ex"
+               ]
              }
     end
 
@@ -80,8 +88,10 @@ defmodule CodeAssistan.Tasks.ElixirTest do
 
       # Assert readonly_files (will be populated based on all project files becoming primary files)
       expected_readonly_files = %{
-        "primary_one.ex" => ["lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex"],
-        "primary_four_dot_alias.ex" => [
+        # Path updated
+        "lib/primary_one.ex" => ["lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex"],
+        # Path updated
+        "lib/primary_four/sub_module.ex" => [
           "lib/primary_four/helper_d.ex",
           "lib/primary_four/sub_module/helper_e.ex"
         ]
@@ -98,9 +108,10 @@ defmodule CodeAssistan.Tasks.ElixirTest do
         language: "Elixir"
       }
 
-      # Only "primary_one.ex", "lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex" contain "primary_one"
+      # Only "lib/primary_one.ex", "lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex" contain "primary_one"
+      # Path updated
       expected_primary_files =
-        ["lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex", "primary_one.ex"]
+        ["lib/primary_one.ex", "lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex"]
         |> Enum.sort()
 
       result_context = CodeAssistan.Tasks.Elixir.call(context)
@@ -113,7 +124,8 @@ defmodule CodeAssistan.Tasks.ElixirTest do
       # lib/primary_one/helper_a.ex and lib/primary_one/helper_b.ex are primary files too,
       # but they don't alias other project files in this test setup.
       expected_readonly_files = %{
-        "primary_one.ex" => ["lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex"]
+        # Path updated
+        "lib/primary_one.ex" => ["lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex"]
       }
 
       assert Map.get(result_context, :readonly_files) == expected_readonly_files
@@ -138,8 +150,10 @@ defmodule CodeAssistan.Tasks.ElixirTest do
       assert Map.get(result_context, :global_readonly_files) == ["assets/prompts/elixir.md"]
 
       expected_readonly_files = %{
-        "primary_one.ex" => ["lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex"],
-        "primary_four_dot_alias.ex" => [
+        # Path updated
+        "lib/primary_one.ex" => ["lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex"],
+        # Path updated
+        "lib/primary_four/sub_module.ex" => [
           "lib/primary_four/helper_d.ex",
           "lib/primary_four/sub_module/helper_e.ex"
         ]
