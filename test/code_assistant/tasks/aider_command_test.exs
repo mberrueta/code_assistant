@@ -33,7 +33,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "--read lib/primary_one/helper_a.ex",
       "--read lib/primary_one/helper_b.ex",
       "--file test/primary_one_test.exs",
-      "--message \"Positive Prompt: Please act as an expert Elixir developer.\n\n\nNegative Prompt: Do not use basic `fixtures`.\n\n\""
+      "--message \"Things to do: Please act as an expert Elixir developer.\n\n------Things to avoid: Do not use basic `fixtures`.\""
     ]
 
     expected_command = Enum.join(expected_parts, " ")
@@ -62,7 +62,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "--read global.md",
       "--read lib/file1.ex",
       "--file test/file1_test.exs",
-      "--message \"Positive Prompt: Positive\n\n\nNegative Prompt: Negative\n\n\""
+      "--message \"Things to do: Positive\n\n------Things to avoid: Negative\""
     ]
 
     expected_command1 = Enum.join(expected_parts1, " ")
@@ -73,7 +73,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "--read lib/file2.ex",
       "--read lib/helper.ex",
       "--file test/file2_test.exs",
-      "--message \"Positive Prompt: Positive\n\n\nNegative Prompt: Negative\n\n\""
+      "--message \"Things to do: Positive\n\n------Things to avoid: Negative\""
     ]
 
     expected_command2 = Enum.join(expected_parts2, " ")
@@ -84,7 +84,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
     assert String.trim(result_context.aider_commands["test/file2_test.exs"]) == expected_command2
   end
 
-  test "handles missing positive prompt" do
+  test "handles missing Things to do" do
     context = %{
       primary_files: ["test/file_test.exs"],
       global_readonly_files: [],
@@ -97,7 +97,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "aider",
       "--read lib/file.ex",
       "--file test/file_test.exs",
-      "--message \"Negative Prompt: Negative only\n\n\""
+      "--message \"Things to avoid: Negative only\""
     ]
 
     expected_command = Enum.join(expected_parts, " ")
@@ -120,7 +120,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "aider",
       "--read lib/file.ex",
       "--file test/file_test.exs",
-      "--message \"Positive Prompt: Positive only\n\n\""
+      "--message \"Things to do: Positive only\""
     ]
 
     expected_command = Enum.join(expected_parts, " ")
@@ -170,7 +170,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "aider",
       "--read global.md",
       "--file test/file_test.exs",
-      "--message \"Positive Prompt: Prompt\n\n\""
+      "--message \"Things to do: Prompt\""
     ]
 
     expected_command = Enum.join(expected_parts, " ")
@@ -194,7 +194,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
       "aider",
       "--read lib/file.ex",
       "--file test/file_test.exs",
-      "--message \"Positive Prompt: Prompt\n\n\""
+      "--message \"Things to do: Prompt\""
     ]
 
     expected_command = Enum.join(expected_parts, " ")

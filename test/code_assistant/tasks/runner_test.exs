@@ -32,7 +32,7 @@ defmodule CodeAssistan.Tasks.RunnerTest do
 
       assert Runner.call(initial_context).aider_commands == %{
                "lib/primary_one.ex" =>
-                 "aider --read assets/prompts/elixir.md --read assets/prompts/elixir_tests.md --read test/support/factories/factory.ex --read test/test_helper.exs --read lib/primary_one.ex --read lib/primary_one/helper_a.ex --read lib/primary_one/helper_b.ex --file lib/primary_one.ex --message \"Positive Prompt: test prompt\n\n\nNegative Prompt: Do not use basic `fixtures`. The project uses factories for test data setup.\nYou must use ExMachina for creating test data structures.\nFor mocking external services or dependencies, you must use Mox.\nDo not use the libraries 'mock' or 'bypass'.\n\n\""
+                 "aider --read assets/prompts/elixir.md --read assets/prompts/elixir_tests.md --read test/support/factories/factory.ex --read test/test_helper.exs --read lib/primary_one.ex --read lib/primary_one/helper_a.ex --read lib/primary_one/helper_b.ex --file lib/primary_one.ex --message \"Things to do: test prompt\n\n------Things to avoid: Do not use basic `fixtures`. The project uses factories for test data setup.\nYou must use ExMachina for creating test data structures.\nFor mocking external services or dependencies, you must use Mox.\nDo not use the libraries 'mock' or 'bypass'.\""
              }
     end
   end

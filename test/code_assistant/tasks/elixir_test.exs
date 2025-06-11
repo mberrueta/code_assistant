@@ -185,5 +185,74 @@ defmodule CodeAssistan.Tasks.ElixirTest do
       assert Map.get(result_context, :global_readonly_files) == ["assets/prompts/elixir.md"]
       assert Map.get(result_context, :readonly_files) == %{}
     end
+
+    test "when filter is an empty string, behaves like no filter" do
+      context = %{
+        filters: "", # Empty string filter
+        task: "Generate tests",
+        language: "Elixir"
+      }
+
+      result_context = CodeAssistan.Tasks.Elixir.call(context)
+
+      assert Map.get(result_context, :project_files) == @all_fixture_project_files
+      # When filter is empty string, primary_files equals project_files
+      assert Map.get(result_context, :primary_files) == @all_fixture_project_files
+      assert Map.get(result_context, :global_readonly_files) == ["assets/prompts/elixir.md"]
+
+      # Assert readonly_files (will be populated based on all project files becoming primary files)
+      expected_readonly_files = %{
+        "lib/primary_one.ex" => ["lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex"],
+        "lib/primary_four/sub_module.ex" => [
+          "lib/primary_four/helper_d.ex",
+          "lib/primary_four/sub_module/helper_e.ex"
+        ]
+      }
+
+      assert Map.get(result_context, :readonly_files) == expected_readonly_files
+    end
+
+    test "excludes files from _build, deps, and priv directories" do
+      # These paths are relative to the fixture_project_path due to File.cd! in setup
+      excluded_dirs = ["_build", "deps", "priv"]
+
+      excluded_files_to_create =
+        Enum.map(excluded_dirs, fn dir ->
+          Path.join(dir, "excluded_#{dir}_file.ex")
+        end)
+
+      # Setup: Create dummy directories and files
+      Enum.each(excluded_dirs, &File.mkdir_p!/1)
+
+      Enum.each(excluded_files_to_create, fn file_path ->
+        File.write!(file_path, "defmodule Excluded.#{Macro.camelize(Path.basename(file_path, ".ex"))} do end")
+      end)
+
+      # Defer cleanup to ensure it runs even if assertions fail
+      on_exit(fn ->
+        Enum.each(excluded_files_to_create, &File.rm/1)
+        Enum.each(excluded_dirs, &File.rm_rf!/1) # Use rm_rf! to remove directories and their contents
+      end)
+
+      context = %{
+        filters: nil, # No filter, so all discoverable files should be considered
+        task: "AnyTask",
+        language: "Elixir"
+      }
+
+      result_context = CodeAssistan.Tasks.Elixir.call(context)
+      project_files = Map.get(result_context, :project_files)
+
+      # Assert: Excluded files are not present
+      for excluded_file <- excluded_files_to_create do
+        refute Enum.member?(project_files, excluded_file),
+               "File #{excluded_file} should have been excluded but was found in project_files."
+      end
+
+      # Assert: All expected non-excluded files are present and no other files are included
+      # @all_fixture_project_files is already sorted, and add_project_files also sorts its output.
+      assert project_files == @all_fixture_project_files,
+             "Project files list should match @all_fixture_project_files after excluding temporary files."
+    end
   end
 end
