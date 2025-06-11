@@ -1,7 +1,11 @@
 defmodule CodeAssistan.Tasks.AiderCommand do
   @moduledoc "A utility module for ElixirTest-related file and code tasks."
   @doc """
-  Generate the aider command for a specific test
+  Generates Aider command strings for each primary file in the context and
+  adds them to the context under the :aider_commands key.
+
+  The `:aider_commands` key will contain a map where each key is a primary file path
+  and the value is the generated Aider command string for that file.
 
   Example:
 
@@ -16,7 +20,7 @@ defmodule CodeAssistan.Tasks.AiderCommand do
      "test/non_existent_source_test.exs", "test/primary_four_sub_module_test.exs",
      "test/primary_one_test.exs",
      "test/primary_three_no_relevant_aliases_test.exs"],
-    primary_files: ["test/primary_one_test.exs"],
+    primary_files: ["test/primary_one_test.exs"], # Example with one primary file
     global_readonly_files: ["assets/prompts/elixir.md",
      "assets/prompts/elixir_tests.md", "test/support/factories/factory.ex",
      "test/test_helper.exs"],
@@ -29,7 +33,21 @@ defmodule CodeAssistan.Tasks.AiderCommand do
   }
   CodeAssistan.Tasks.AiderCommand.call(context)
 
-  => aider --read a --read b --file c --message "lorem"
+  => %{
+       task: "Generate tests",
+       language: "Elixir",
+       project_files: ["a.ex", "another.ex", "b.exs", "..."], # Contents as defined in context
+       primary_files: ["test/primary_one_test.exs"],
+       global_readonly_files: ["assets/prompts/elixir.md", "..."], # Contents as defined
+       readonly_files: %{
+         "test/primary_one_test.exs" => ["lib/primary_one.ex", "..."] # Contents as defined
+       },
+       positive_prompt: "Please act as an expert Elixir developer.",
+       negative_prompt: "Do not use basic `fixtures`. ",
+       aider_commands: %{
+         "test/primary_one_test.exs" => "aider --read assets/prompts/elixir.md --read assets/prompts/elixir_tests.md --read test/support/factories/factory.ex --read test/test_helper.exs --read lib/primary_one.ex --read lib/primary_one/helper_a.ex --read lib/primary_one/helper_b.ex --file test/primary_one_test.exs --message \"Positive Prompt: Please act as an expert Elixir developer.\\n\\n\\nNegative Prompt: Do not use basic `fixtures`. \\n\\n\""
+       }
+     }
   """
   def call(context) do
     context

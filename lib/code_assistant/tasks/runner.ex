@@ -10,6 +10,7 @@ defmodule CodeAssistan.Tasks.Runner do
           context
           |> E.call()
           |> handle_elixir_task()
+          |> CodeAssistan.Tasks.AiderCommand.call()
 
         _other_language ->
           # For now, pass through if not Elixir.

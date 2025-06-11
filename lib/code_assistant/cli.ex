@@ -4,15 +4,14 @@ defmodule CodeAssistant.CLI do
 
   # The main entry point for the command-line application.
   def main(_args) do
-    workflow_data =
-      :ok
-      |> select_language()
-      |> select_task()
-      |> get_prompts()
-      |> select_filters()
-
-    # Display a summary of the collected information.
-    display_summary(workflow_data)
+    :ok
+    |> select_language()
+    |> select_task()
+    |> get_prompts()
+    |> select_filters()
+    |> CodeAssistan.Tasks.Runner.call()
+    |> display_summary()
+    |> confirm_aider_commands()
   end
 
   # Step 1: Prompt the user to select a programming language.
@@ -86,5 +85,69 @@ defmodule CodeAssistant.CLI do
     summary_box = Owl.Box.new(content, title: "Request Summary", border: :heavy)
 
     Owl.IO.puts(summary_box)
+
+    data
+  end
+
+  # Step: Confirm Aider commands with the user one by one.
+  defp confirm_aider_commands(data) do
+    case Map.get(data, :aider_commands) do
+      nil ->
+        # No commands to process
+        data
+
+      commands when map_size(commands) == 0 ->
+        # No commands to process
+        data
+
+      commands ->
+        # Add a blank line for separation
+        IO.puts("")
+        IO.puts(D.tag("Aider Command Execution Confirmation:", :cyan))
+
+        Enum.each(commands, fn {file_path, command_str} ->
+          command_box_content = [
+            command_str
+          ]
+
+          command_box =
+            Owl.Box.new(command_box_content,
+              title: D.tag(file_path, :yellow),
+              border: [style: :single, color: :cyan]
+            )
+
+          Owl.IO.puts(command_box)
+
+          if IO.confirm(message: "Execute this command?") do
+            IO.puts(D.tag("OK (Aider command execution pending implementation)", :green))
+            # Attempt to execute a secondary command, like running tests
+            handle_secondary_command_result(
+              CodeAssistan.Tasks.CommandExecutor.execute(file_path, data)
+            )
+          else
+            IO.puts(D.tag("Skipped.", :yellow))
+          end
+
+          # Add a blank line for separation before the next command
+          IO.puts("")
+        end)
+
+        data
+    end
+
+    data
+  end
+
+  defp handle_secondary_command_result({:ok, {output, exit_status}}) do
+    IO.puts(D.tag("Secondary command output (exit status: #{exit_status}):", :blue))
+    IO.puts(output)
+  end
+
+  defp handle_secondary_command_result({:ok, :no_specific_secondary_action}) do
+    IO.puts(D.tag("No specific secondary command was executed.", :blue))
+  end
+
+  defp handle_secondary_command_result({:error, reason}) do
+    IO.puts(D.error("Error executing secondary command: #{inspect(reason)}"))
   end
 end
