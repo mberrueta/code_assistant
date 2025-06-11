@@ -8,15 +8,10 @@ defmodule CodeAssistan.Tasks.CommandExecutor do
   `mix test <file_path>` would be run.
   """
   def execute(file_path, aider_command_str, data) do
-    # Split the command string into executable and arguments
-    # Assuming aider_command_str is well-formed, e.g., "aider arg1 arg2 --option value"
-    parts = String.split(aider_command_str, " ")
-    aider_exe = List.first(parts)
-    aider_args = List.delete_at(parts, 0)
-
-    # Execute the Aider command
+    # Execute the Aider command by passing the full string to the shell
     # stderr_to_stdout: true merges stderr into the output string for simpler handling
-    aider_result = System.cmd(aider_exe, aider_args, stderr_to_stdout: true)
+    # Using "sh -c" allows the shell to parse the command string correctly.
+    aider_result = System.cmd("sh", ["-c", aider_command_str], stderr_to_stdout: true)
 
     # Run post-Aider checks
     checks_result = run_post_aider_checks(file_path, data)
@@ -27,13 +22,14 @@ defmodule CodeAssistan.Tasks.CommandExecutor do
   defp run_post_aider_checks(file_path, data) do
     cond do
       data.language == "Elixir" &&
-          data.task == "Generate tests" &&
+        data.task == "Generate tests" &&
           String.ends_with?(file_path, "_test.exs") ->
         command_parts = ["test", file_path]
         # Execute mix test command
         mix_test_result = System.cmd("mix", command_parts, stderr_to_stdout: true)
         # Return the result of the mix test command
-        {:ok, mix_test_result} # mix_test_result is {output_string, exit_status_integer}
+        # mix_test_result is {output_string, exit_status_integer}
+        {:ok, mix_test_result}
 
       true ->
         # No specific action for other cases

@@ -120,17 +120,11 @@ defmodule CodeAssistant.CLI do
         IO.puts("")
 
         Enum.each(aider_commands, fn {file_path, command_str} ->
-          command_box_content = [
-            command_str
-          ]
-
-          command_box =
-            Owl.Box.new(command_box_content,
-              title: D.tag(file_path, :yellow),
-              border: [style: :single, color: :cyan]
-            )
-
-          Owl.IO.puts(command_box)
+          # Print the file path in cyan
+          IO.puts(D.tag(file_path, :cyan))
+          # Print the command string in yellow
+          IO.puts(D.tag(command_str, :yellow))
+          IO.puts("") # Add a small space before the confirmation prompt
 
           if IO.confirm(message: "Execute this command?") do
             # Execute the Aider command and then post-Aider checks
@@ -152,12 +146,24 @@ defmodule CodeAssistant.CLI do
   defp handle_execution_results({:ok, results}) do
     # Handle Aider command result
     case results.aider do
-      {output, exit_status} ->
-        IO.puts(D.tag("Aider command output (exit status: #{exit_status}):", :blue))
+      {output, 0} ->
+        # Aider command succeeded
+        IO.puts(D.tag("Aider command output (exit status: 0):", :blue))
         IO.puts(output)
 
+      {output, exit_status} ->
+        # Aider command failed
+        error_box_content = [output]
+        error_box_title = D.tag("Aider command failed (exit status: #{exit_status})", :red)
+        error_box =
+          Owl.Box.new(error_box_content,
+            title: error_box_title,
+            border: [style: :single, color: :red]
+          )
+        Owl.IO.puts(error_box)
+
       other ->
-        IO.puts(D.error("Unexpected Aider command result format: #{inspect(other)}"))
+        IO.puts(D.tag("Unexpected Aider command result format: #{inspect(other)}", :red))
     end
 
     # Separator
@@ -173,11 +179,14 @@ defmodule CodeAssistant.CLI do
         IO.puts(D.tag("No specific post-Aider checks were performed.", :blue))
 
       other ->
-        IO.puts(D.error("Unexpected post-Aider checks result format: #{inspect(other)}"))
+        IO.puts(D.tag("Unexpected post-Aider checks result format: #{inspect(other)}", :red))
     end
   end
 
-  defp handle_execution_results({:error, reason}) do
-    IO.puts(D.error("Error during command execution phase: #{inspect(reason)}"))
-  end
+  # This clause was reported as unused by the compiler because
+  # CodeAssistan.Tasks.CommandExecutor.execute/3 always returns {:ok, results_map}.
+  # Errors within the execution are reported inside the results_map.
+  # defp handle_execution_results({:error, reason}) do
+  #   IO.puts(D.tag("Error during command execution phase: #{inspect(reason)}", :red))
+  # end
 end

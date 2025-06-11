@@ -83,13 +83,13 @@ defmodule CodeAssistan.Tasks.AiderCommand do
     message_content =
       cond do
         has_positive_prompt and has_negative_prompt ->
-          "Positive Prompt: #{positive_prompt}\n\n\nNegative Prompt: #{negative_prompt}\n\n"
+          "Things to do: #{positive_prompt}\n\n------Things to avoid: #{negative_prompt}"
 
         has_positive_prompt ->
-          "Positive Prompt: #{positive_prompt}\n\n"
+          "Things to do: #{positive_prompt}"
 
         has_negative_prompt ->
-          "Negative Prompt: #{negative_prompt}\n\n"
+          "Things to avoid: #{negative_prompt}"
 
         true ->
           ""

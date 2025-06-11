@@ -19,7 +19,11 @@ defmodule CodeAssistan.Tasks.ElixirTest do
                                # Renamed
                                "lib/primary_three_no_relevant_aliases.ex",
                                # Stays at root of fixture
-                               "primary_two_no_module.ex"
+                               "primary_two_no_module.ex",
+                               "test/non_existent_source_test.exs",
+                               "test/primary_four_sub_module_test.exs",
+                               "test/primary_one_test.exs",
+                               "test/primary_three_no_relevant_aliases_test.exs"
                              ]
                              |> Enum.sort()
 
@@ -111,7 +115,12 @@ defmodule CodeAssistan.Tasks.ElixirTest do
       # Only "lib/primary_one.ex", "lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex" contain "primary_one"
       # Path updated
       expected_primary_files =
-        ["lib/primary_one.ex", "lib/primary_one/helper_a.ex", "lib/primary_one/helper_b.ex"]
+        [
+          "lib/primary_one.ex",
+          "lib/primary_one/helper_a.ex",
+          "lib/primary_one/helper_b.ex",
+          "test/primary_one_test.exs"
+        ]
         |> Enum.sort()
 
       result_context = CodeAssistan.Tasks.Elixir.call(context)
