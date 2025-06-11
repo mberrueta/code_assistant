@@ -124,12 +124,13 @@ defmodule CodeAssistant.CLI do
           IO.puts(D.tag(file_path, :cyan))
           # Print the command string in yellow
           IO.puts(D.tag(command_str, :yellow))
-          IO.puts("") # Add a small space before the confirmation prompt
+          # Add a small space before the confirmation prompt
+          IO.puts("")
 
           if IO.confirm(message: "Execute this command?") do
-            {:ok, spinner_pid} =
+            {:ok, _spinner_pid} =
               Owl.Spinner.start(
-                id: CodeAssistant.CLI.Spinner, # Added ID for the spinner
+                id: CodeAssistant.CLI.Spinner,
                 type: :dots,
                 message: "Executing commands..."
               )
@@ -137,7 +138,7 @@ defmodule CodeAssistant.CLI do
             # Execute the Aider command and then post-Aider checks
             results = CodeAssistan.Tasks.CommandExecutor.execute(file_path, command_str, data)
 
-            Owl.Spinner.stop(spinner_pid)
+            Owl.Spinner.stop(id: CodeAssistant.CLI.Spinner, resolution: :ok)
             handle_execution_results(results)
           else
             IO.puts(D.tag("Skipped.", :yellow))
@@ -158,22 +159,26 @@ defmodule CodeAssistant.CLI do
         # Aider command succeeded
         success_box_content = [output]
         success_box_title = D.tag("Aider command successful (exit status: 0)", :green)
+
         success_box =
           Owl.Box.new(success_box_content,
             title: success_box_title,
             border: [style: :single, color: :green]
           )
+
         Owl.IO.puts(success_box)
 
       {output, exit_status} ->
         # Aider command failed
         error_box_content = [output]
         error_box_title = D.tag("Aider command failed (exit status: #{exit_status})", :red)
+
         error_box =
           Owl.Box.new(error_box_content,
             title: error_box_title,
             border: [style: :single, color: :red]
           )
+
         Owl.IO.puts(error_box)
 
       other ->
@@ -189,22 +194,26 @@ defmodule CodeAssistant.CLI do
         # Post-Aider checks succeeded
         success_box_content = [output]
         success_box_title = D.tag("Post-Aider checks successful (exit status: 0)", :green)
+
         success_box =
           Owl.Box.new(success_box_content,
             title: success_box_title,
             border: [style: :single, color: :green]
           )
+
         Owl.IO.puts(success_box)
 
       {:ok, {output, exit_status}} ->
         # Post-Aider checks failed
         error_box_content = [output]
         error_box_title = D.tag("Post-Aider checks failed (exit status: #{exit_status})", :red)
+
         error_box =
           Owl.Box.new(error_box_content,
             title: error_box_title,
             border: [style: :single, color: :red]
           )
+
         Owl.IO.puts(error_box)
 
       {:ok, :no_specific_action} ->

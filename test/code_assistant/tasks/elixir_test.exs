@@ -255,4 +255,41 @@ defmodule CodeAssistan.Tasks.ElixirTest do
              "Project files list should match @all_fixture_project_files after excluding temporary files."
     end
   end
+
+  describe "call/1 with an empty project directory" do
+    setup do
+      original_cwd = File.cwd!()
+
+      # Create a unique temporary directory for the empty project scenario
+      # Path.join is used to ensure OS-agnostic path construction.
+      # System.unique_integer ensures the directory name is unique to avoid conflicts.
+      temp_dir_name = "test_empty_project_#{System.unique_integer([:positive])}"
+      empty_project_path = Path.join(original_cwd, temp_dir_name)
+
+      File.mkdir_p!(empty_project_path)
+      File.cd!(empty_project_path)
+
+      on_exit(fn ->
+        File.cd!(original_cwd)
+        File.rm_rf!(empty_project_path)
+      end)
+
+      :ok
+    end
+
+    test "handles empty project directory by returning empty file lists" do
+      context = %{
+        filters: nil, # No specific filters, should process all (none) files
+        task: "AnyTask",
+        language: "Elixir"
+      }
+
+      result_context = CodeAssistan.Tasks.Elixir.call(context)
+
+      assert Map.get(result_context, :project_files) == []
+      assert Map.get(result_context, :primary_files) == []
+      assert Map.get(result_context, :global_readonly_files) == ["assets/prompts/elixir.md"]
+      assert Map.get(result_context, :readonly_files) == %{}
+    end
+  end
 end
