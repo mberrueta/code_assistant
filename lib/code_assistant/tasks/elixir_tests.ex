@@ -1,6 +1,5 @@
 defmodule CodeAssistan.Tasks.ElixirTests do
   @moduledoc "A utility module for ElixirTest-related file and code tasks."
-  @behaviour CodeAssistan.Tasks.ElixirTestsBehaviour
 
   @test_base_files [
     "assets/prompts/elixir_tests.md",

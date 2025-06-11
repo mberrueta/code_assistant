@@ -61,7 +61,7 @@ defmodule CodeAssistan.Tasks.AiderCommand do
   end
 
   defp do_gen_command(context, file_to_test) do
-    (["aider"] ++
+    (["aider --yes"] ++
        add_read_file_args(context.global_readonly_files) ++
        add_read_file_args(context.readonly_files[file_to_test]) ++
        [add_target_file_arg(file_to_test)] ++
