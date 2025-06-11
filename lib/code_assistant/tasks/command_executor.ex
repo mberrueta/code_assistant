@@ -7,21 +7,37 @@ defmodule CodeAssistan.Tasks.CommandExecutor do
   processed by Aider was a test file, this function will indicate that
   `mix test <file_path>` would be run.
   """
-  def execute(file_path, data) do
+  def execute(file_path, aider_command_str, data) do
+    # Split the command string into executable and arguments
+    # Assuming aider_command_str is well-formed, e.g., "aider arg1 arg2 --option value"
+    parts = String.split(aider_command_str, " ")
+    aider_exe = List.first(parts)
+    aider_args = List.delete_at(parts, 0)
+
+    # Execute the Aider command
+    # stderr_to_stdout: true merges stderr into the output string for simpler handling
+    aider_result = System.cmd(aider_exe, aider_args, stderr_to_stdout: true)
+
+    # Run post-Aider checks
+    checks_result = run_post_aider_checks(file_path, data)
+
+    {:ok, %{aider: aider_result, checks: checks_result}}
+  end
+
+  defp run_post_aider_checks(file_path, data) do
     cond do
       data.language == "Elixir" &&
-          data.task == "Generate tests" && # Retaining this condition as per original logic
+          data.task == "Generate tests" &&
           String.ends_with?(file_path, "_test.exs") ->
         command_parts = ["test", file_path]
-        # System.cmd returns {output, exit_status}
-        # We'll run the command from the current working directory.
-        # No specific environment variables or other options needed for now.
-        result = System.cmd("mix", command_parts, [])
-        {:ok, result} # result is {output_string, exit_status_integer}
+        # Execute mix test command
+        mix_test_result = System.cmd("mix", command_parts, stderr_to_stdout: true)
+        # Return the result of the mix test command
+        {:ok, mix_test_result} # mix_test_result is {output_string, exit_status_integer}
 
       true ->
-        # No specific secondary action for other cases at the moment.
-        {:ok, :no_specific_secondary_action}
+        # No specific action for other cases
+        {:ok, :no_specific_action}
     end
   end
 end

@@ -91,21 +91,35 @@ defmodule CodeAssistant.CLI do
 
   # Step: Confirm Aider commands with the user one by one.
   defp confirm_aider_commands(data) do
-    case Map.get(data, :aider_commands) do
-      nil ->
-        # No commands to process
-        data
+    aider_commands = Map.get(data, :aider_commands)
+    dbg()
 
-      commands when map_size(commands) == 0 ->
-        # No commands to process
-        data
-
-      commands ->
-        # Add a blank line for separation
+    cond do
+      is_nil(aider_commands) or map_size(aider_commands) == 0 ->
+        # For spacing from previous output
         IO.puts("")
-        IO.puts(D.tag("Aider Command Execution Confirmation:", :cyan))
 
-        Enum.each(commands, fn {file_path, command_str} ->
+        IO.puts(
+          D.tag(
+            "No Aider commands to execute. This might be due to your filters or an empty project.",
+            :yellow
+          )
+        )
+
+        # Ensure a blank line after this message
+        IO.puts("")
+        data
+
+      true ->
+        count = map_size(aider_commands)
+        # For spacing from previous output
+        IO.puts("")
+        IO.puts(D.tag("Found #{count} Aider command(s) to review.", :green))
+        IO.puts(D.tag("Aider Command Execution Confirmation:", :cyan))
+        # Add a blank line for separation before the first command box
+        IO.puts("")
+
+        Enum.each(aider_commands, fn {file_path, command_str} ->
           command_box_content = [
             command_str
           ]
@@ -119,35 +133,51 @@ defmodule CodeAssistant.CLI do
           Owl.IO.puts(command_box)
 
           if IO.confirm(message: "Execute this command?") do
-            IO.puts(D.tag("OK (Aider command execution pending implementation)", :green))
-            # Attempt to execute a secondary command, like running tests
-            handle_secondary_command_result(
-              CodeAssistan.Tasks.CommandExecutor.execute(file_path, data)
+            # Execute the Aider command and then post-Aider checks
+            handle_execution_results(
+              CodeAssistan.Tasks.CommandExecutor.execute(file_path, command_str, data)
             )
           else
             IO.puts(D.tag("Skipped.", :yellow))
           end
 
-          # Add a blank line for separation before the next command
+          # Add a blank line for separation before the next command or after the last one
           IO.puts("")
         end)
 
         data
     end
-
-    data
   end
 
-  defp handle_secondary_command_result({:ok, {output, exit_status}}) do
-    IO.puts(D.tag("Secondary command output (exit status: #{exit_status}):", :blue))
-    IO.puts(output)
+  defp handle_execution_results({:ok, results}) do
+    # Handle Aider command result
+    case results.aider do
+      {output, exit_status} ->
+        IO.puts(D.tag("Aider command output (exit status: #{exit_status}):", :blue))
+        IO.puts(output)
+
+      other ->
+        IO.puts(D.error("Unexpected Aider command result format: #{inspect(other)}"))
+    end
+
+    # Separator
+    IO.puts("")
+
+    # Handle Post-Aider checks result
+    case results.checks do
+      {:ok, {output, exit_status}} ->
+        IO.puts(D.tag("Post-Aider checks output (exit status: #{exit_status}):", :blue))
+        IO.puts(output)
+
+      {:ok, :no_specific_action} ->
+        IO.puts(D.tag("No specific post-Aider checks were performed.", :blue))
+
+      other ->
+        IO.puts(D.error("Unexpected post-Aider checks result format: #{inspect(other)}"))
+    end
   end
 
-  defp handle_secondary_command_result({:ok, :no_specific_secondary_action}) do
-    IO.puts(D.tag("No specific secondary command was executed.", :blue))
-  end
-
-  defp handle_secondary_command_result({:error, reason}) do
-    IO.puts(D.error("Error executing secondary command: #{inspect(reason)}"))
+  defp handle_execution_results({:error, reason}) do
+    IO.puts(D.error("Error during command execution phase: #{inspect(reason)}"))
   end
 end
