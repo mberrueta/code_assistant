@@ -24,7 +24,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
     }
 
     expected_parts = [
-      "aider --yes",
+      "aider",
       "--read assets/prompts/elixir.md",
       "--read assets/prompts/elixir_tests.md",
       "--read test/support/factories/factory.ex",
@@ -58,7 +58,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
     }
 
     expected_parts1 = [
-      "aider --yes",
+      "aider",
       "--read global.md",
       "--read lib/file1.ex",
       "--file test/file1_test.exs",
@@ -68,7 +68,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
     expected_command1 = Enum.join(expected_parts1, " ")
 
     expected_parts2 = [
-      "aider --yes",
+      "aider",
       "--read global.md",
       "--read lib/file2.ex",
       "--read lib/helper.ex",
@@ -94,7 +94,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
     }
 
     expected_parts = [
-      "aider --yes",
+      "aider",
       "--read lib/file.ex",
       "--file test/file_test.exs",
       "--message \"Things to avoid: Negative only\""
@@ -117,7 +117,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
     }
 
     expected_parts = [
-      "aider --yes",
+      "aider",
       "--read lib/file.ex",
       "--file test/file_test.exs",
       "--message \"Things to do: Positive only\""
@@ -143,7 +143,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
     # (note the trailing space because the message part was effectively an empty string in the join list).
     # String.trim will handle this.
     expected_parts = [
-      "aider --yes",
+      "aider",
       "--read lib/file.ex",
       "--file test/file_test.exs"
     ]
@@ -167,7 +167,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
     }
 
     expected_parts = [
-      "aider --yes",
+      "aider",
       "--read global.md",
       "--file test/file_test.exs",
       "--message \"Things to do: Prompt\""
@@ -191,7 +191,7 @@ defmodule CodeAssistan.Tasks.AiderCommandTest do
     }
 
     expected_parts = [
-      "aider --yes",
+      "aider",
       "--read lib/file.ex",
       "--file test/file_test.exs",
       "--message \"Things to do: Prompt\""
